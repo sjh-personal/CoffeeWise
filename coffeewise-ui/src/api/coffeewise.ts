@@ -80,3 +80,33 @@ export async function submitOrder(order: {
   if (!res.ok) throw new Error("Failed to submit order");
   return res.json();
 }
+
+export async function fetchPairwise(personA: string, personB: string) {
+  const res = await fetch(
+    `${
+      import.meta.env.VITE_API_BASE_URL
+    }/api/groups/${GROUP_ID}/pairwise?personA=${personA}&personB=${personB}`
+  );
+  if (!res.ok) throw new Error("Failed to fetch pairwise");
+  return await res.json();
+}
+
+export async function settlePairwise(
+  personA: string,
+  personB: string,
+  amount: number
+) {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_BASE_URL}/api/groups/${GROUP_ID}/settle`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fromPersonId: personA,
+        toPersonId: personB,
+        amount,
+      }),
+    }
+  );
+  if (!res.ok) throw new Error("Failed to settle up");
+}

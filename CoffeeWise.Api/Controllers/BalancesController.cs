@@ -30,4 +30,20 @@ public class BalancesController(IBalanceService balanceService) : ControllerBase
             return NoContent();
         }
     }
+    
+    [HttpGet("/api/groups/{groupId}/pairwise")]
+    public async Task<ActionResult<PairwiseBalanceDto>> GetPairwiseBalance(Guid groupId, [FromQuery] Guid personA, [FromQuery] Guid personB)
+    {
+        if (personA == personB) return BadRequest("Cannot compare same person.");
+        var result = await balanceService.GetPairwiseBalanceAsync(groupId, personA, personB);
+        return Ok(result);
+    }
+
+    [HttpPost("/api/groups/{groupId}/settle")]
+    public async Task<IActionResult> SettleUp(Guid groupId, [FromBody] SettleUpRequestDto request)
+    {
+        if (request.FromPersonId == request.ToPersonId) return BadRequest("Cannot settle up with self.");
+        await balanceService.SettleUpAsync(groupId, request.FromPersonId, request.ToPersonId, request.Amount);
+        return Ok();
+    }
 }

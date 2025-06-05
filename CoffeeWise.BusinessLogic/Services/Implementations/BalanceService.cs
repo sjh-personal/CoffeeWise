@@ -1,5 +1,6 @@
 using CoffeeWise.BusinessLogic.Models;
 using CoffeeWise.Data;
+using CoffeeWise.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CoffeeWise.BusinessLogic.Services.Implementations;
@@ -135,4 +136,62 @@ public class BalanceService(CoffeeWiseDbContext db) : IBalanceService
         .OrderBy(b => b.Balance)
         .ToList();
     }
+    
+    public async Task<PairwiseBalanceDto> GetPairwiseBalanceAsync(Guid groupId, Guid personAId, Guid personBId)
+    {
+        var ab = await db.Orders
+            .Where(o => o.GroupId == groupId)
+            .SelectMany(o => o.Items
+                .Where(i => o.PayerGroupMember.Person.Id == personAId && i.GroupMember.Person.Id == personBId)
+                .Select(i => i.Price))
+            .SumAsync();
+
+        var ba = await db.Orders
+            .Where(o => o.GroupId == groupId)
+            .SelectMany(o => o.Items
+                .Where(i => o.PayerGroupMember.Person.Id == personBId && i.GroupMember.Person.Id == personAId)
+                .Select(i => i.Price))
+            .SumAsync();
+
+        var (fromId, toId, amount) = ba - ab >= 0
+            ? (personAId, personBId, ba - ab)
+            : (personBId, personAId, ab - ba);
+
+        var names = await db.Persons
+            .Where(p => p.Id == fromId || p.Id == toId)
+            .ToDictionaryAsync(p => p.Id, p => p.Name);
+
+        return new PairwiseBalanceDto(fromId, names[fromId], toId, names[toId], amount);
+    }
+    public async Task SettleUpAsync(Guid groupId, Guid fromPersonId, Guid toPersonId, decimal amount)
+    {
+        if (amount <= 0) throw new ArgumentException("Amount must be positive.");
+        if (fromPersonId == toPersonId) throw new ArgumentException("Cannot settle up with self.");
+
+        var members = await db.GroupMembers
+            .Where(gm => gm.GroupId == groupId && (gm.PersonId == fromPersonId || gm.PersonId == toPersonId))
+            .ToDictionaryAsync(gm => gm.PersonId, gm => gm.Id);
+
+        if (!members.ContainsKey(fromPersonId) || !members.ContainsKey(toPersonId))
+            throw new InvalidOperationException("Group members not found.");
+
+        db.Orders.Add(new Order
+        {
+            GroupId = groupId,
+            PayerGroupMemberId = members[fromPersonId],
+            Date = DateTime.UtcNow,
+            Items = new List<OrderItem>
+            {
+                new OrderItem
+                {
+                    GroupMemberId = members[toPersonId],
+                    Description = "Settlement Payment",
+                    Price = -amount
+                }
+            }
+        });
+
+        await db.SaveChangesAsync();
+    }
+
 }
