@@ -1,12 +1,24 @@
 .vscode/
+
 bin/
 obj/
+debug/
+release/
+ref/
+refand/
+
 *.user
 *.suo
-node_modules/
-#.env - TODO - add this back (ignoring to allow demo environment)
-#.env.* - TODO - add this back (ignoring to allow demo environment)
+
 *.iml
 *.ipr
 *.iws
+
+node_modules/
+frontend/coffeewise-ui/node_modules/
+
+# TODO - uncomment if not demoing 
+# .env
+# .env.*
+
 .DS_Store
