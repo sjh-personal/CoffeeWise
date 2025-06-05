@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CoffeeWise.BusinessLogic")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fc00898a8afca63833dd3481ba854d73f49917d2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+070b8af893da56e2e07823f5cda8218644e48560")]
 [assembly: System.Reflection.AssemblyProductAttribute("CoffeeWise.BusinessLogic")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CoffeeWise.BusinessLogic")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -7,33 +7,29 @@ namespace CoffeeWise.BusinessLogic.Services.Implementations;
 
 public class OrderService(CoffeeWiseDbContext db) : IOrderService
 {
-     public async Task<Guid> SubmitOrderAsync(Guid groupId, Guid payerPersonId, DateOnly date, List<OrderItemDto> items)
+     public async Task<Guid> SubmitOrderAsync(Guid groupId, Guid payerPersonId, DateTime date, List<OrderItemDto> items)
     {
-        var groupMember = await db.GroupMembers
+        var groupMembers = await db.GroupMembers
             .Where(gm => gm.GroupId == groupId)
-            .Where(gm => gm.PersonId == payerPersonId)
-            .FirstOrDefaultAsync();
-        
-        if (groupMember is null)
-        {
-            throw new Exception("Payer is not a group member");   
-        }
+            .ToDictionaryAsync(gm => gm.PersonId, gm => gm.Id);
 
+        if (!groupMembers.TryGetValue(payerPersonId, out var payerGroupMemberId))
+        {
+            throw new Exception("Payer is not a group member");
+        }
+        
         var order = new Order
         {
             Id = Guid.NewGuid(),
             GroupId = groupId,
-            PayerGroupMemberId = groupMember.Id,
-            Date = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc),
+            PayerGroupMemberId = payerGroupMemberId,
+            Date = date.Kind == DateTimeKind.Utc ? date : date.ToUniversalTime(),
             Items = items.Select(i => new OrderItem
             {
                 Id = Guid.NewGuid(),
-                GroupMemberId = i.ConsumerPersonId == payerPersonId
-                    ? groupMember.Id
-                    : db.GroupMembers
-                        .Where(gm => gm.GroupId == groupId && gm.PersonId == i.ConsumerPersonId)
-                        .Select(gm => gm.Id)
-                        .First(), 
+                GroupMemberId = groupMembers.TryGetValue(i.ConsumerPersonId, out var gmId)
+                    ? gmId
+                    : throw new Exception($"Person {i.ConsumerPersonId} is not a group member"),
                 Description = i.Description,
                 Price = i.Price
             }).ToList()
@@ -47,46 +43,23 @@ public class OrderService(CoffeeWiseDbContext db) : IOrderService
     public async Task<List<OrderDto>> GetOrdersForGroupAsync(Guid groupId)
     {
         var orders = await db.Orders
+            .Where(o => o.GroupId == groupId)
             .Include(o => o.PayerGroupMember).ThenInclude(gm => gm.Person)
             .Include(o => o.Items).ThenInclude(i => i.GroupMember).ThenInclude(gm => gm.Person)
-            .Where(o => o.GroupId == groupId)
             .ToListAsync();
 
-        return orders.Select(o =>
-            new OrderDto(
+        return orders
+            .Select(o => new OrderDto(
                 o.Id,
                 o.PayerGroupMember.Person.Id,
-                DateOnly.FromDateTime(o.Date),
+                o.Date, 
                 o.Items.Select(i => new OrderItemDto(
                     i.GroupMember.Person.Id,
                     i.Description,
                     i.Price
                 )).ToList()
-            )
-        ).ToList();
-    }
-
-    public async Task<OrderDto> GetOrderAsync(Guid orderId)
-    {
-        var order = await db.Orders
-            .Include(o => o.PayerGroupMember).ThenInclude(gm => gm.Person)
-            .Include(o => o.Items).ThenInclude(i => i.GroupMember).ThenInclude(gm => gm.Person)
-            .FirstOrDefaultAsync(o => o.Id == orderId);
-
-        if (order is null)
-        {
-            throw new Exception($"Order not found: '{orderId}'");
-        }
-
-        return new OrderDto(
-            order.Id,
-            order.PayerGroupMember.Person.Id,
-            DateOnly.FromDateTime(order.Date),
-            order.Items.Select(i => new OrderItemDto(
-                i.GroupMember.Person.Id,
-                i.Description,
-                i.Price
-            )).ToList()
-        );
+            ))
+            .OrderByDescending(o => o.Date)
+            .ToList();
     }
 }

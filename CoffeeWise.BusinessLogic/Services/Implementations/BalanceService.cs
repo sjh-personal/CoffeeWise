@@ -8,38 +8,22 @@ public class BalanceService(CoffeeWiseDbContext db) : IBalanceService
 {
     public async Task<List<PairwiseContributionDto>> GetPairwiseContributionsAsync(Guid groupId)
     {
-        var orders = await db.Orders
-            .Include(o => o.PayerGroupMember).ThenInclude(gm => gm.Person)
-            .Include(o => o.Items).ThenInclude(i => i.GroupMember).ThenInclude(gm => gm.Person)
+        return await db.Orders
             .Where(o => o.GroupId == groupId)
-            .ToListAsync();
-        
-        var pairwise = new Dictionary<(Guid payer, Guid recipient), decimal>();
-
-        foreach (var order in orders)
-        {
-            var payerId = order.PayerGroupMember.Person.Id;
-
-            foreach (var item in order.Items)
+            .SelectMany(o => o.Items.Select(i => new
             {
-                var recipientId = item.GroupMember.Person.Id;
-                var price = item.Price;
-                
-                if (recipientId == payerId) continue;
-
-                var key = (payer: payerId, recipient: recipientId);
-                pairwise.TryAdd(key, 0m);
-                pairwise[key] += price;
-            }
-        }
-        
-        return pairwise
-            .Select(kvp => new PairwiseContributionDto(
-                PayerPersonId: kvp.Key.payer,
-                RecipientPersonId: kvp.Key.recipient,
-                AmountPaidForRecipient: kvp.Value
+                PayerId = o.PayerGroupMember.Person.Id,
+                RecipientId = i.GroupMember.Person.Id,
+                Amount = i.Price
+            }))
+            .Where(x => x.PayerId != x.RecipientId) // exclude self-payments
+            .GroupBy(x => new { x.PayerId, x.RecipientId })
+            .Select(g => new PairwiseContributionDto(
+                g.Key.PayerId,
+                g.Key.RecipientId,
+                g.Sum(x => x.Amount)
             ))
-            .ToList();
+            .ToListAsync();
     }
     
     public async Task<List<NetPositionDto>> GetNetPositionsAsync(Guid groupId)
@@ -53,30 +37,30 @@ public class BalanceService(CoffeeWiseDbContext db) : IBalanceService
 
         var paidForOthers = new Dictionary<Guid, decimal>();
         var paidByOthers = new Dictionary<Guid, decimal>();
-
-        foreach (var gm in members)
+        
+        foreach (var member in members)
         {
-            paidForOthers[gm.Person.Id] = 0m;
-            paidByOthers[gm.Person.Id] = 0m;
+            paidForOthers[member.Person.Id] = 0m;
+            paidByOthers[member.Person.Id] = 0m;
         }
-
+        
         foreach (var entry in pairwise)
         {
             paidForOthers[entry.PayerPersonId] += entry.AmountPaidForRecipient;
             paidByOthers[entry.RecipientPersonId] += entry.AmountPaidForRecipient;
         }
-
-        var positions = members
-            .Select(gm =>
+        
+        var netPositions = members
+            .Select(m =>
             {
-                var pid = gm.Person.Id;
-                var net = paidForOthers[pid] - paidByOthers[pid];
-                return new NetPositionDto(pid, gm.Person.Name, net);
+                var pid = m.Person.Id;
+                var netBalance = paidForOthers[pid] - paidByOthers[pid];
+                return new NetPositionDto(pid, m.Person.Name, netBalance);
             })
             .OrderBy(np => np.NetBalance)
             .ToList();
 
-        return positions;
+        return netPositions;
     }
 
     public async Task<PersonDto> GetNextPayerAsync(Guid groupId, DateOnly date)

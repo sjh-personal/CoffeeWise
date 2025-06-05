@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Container, Box, Stack, Paper } from "@mui/material";
 import logo from "./assets/coffeewise-logo.png";
 import DailyCoffee from "./containers/DailyCoffee";
@@ -7,6 +8,10 @@ import BalanceDisplay from "./components/BalanceDisplay";
 export const GROUP_ID = import.meta.env.VITE_GROUP_ID;
 
 export default function App() {
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const triggerRefresh = () => setRefreshKey((prev) => prev + 1);
+
   return (
     <Container maxWidth="md" sx={{ my: 6 }}>
       <Stack direction="column" alignItems="center" spacing={4}>
@@ -17,13 +22,13 @@ export default function App() {
           sx={{ height: 180, mb: 1 }}
         />
         <Section>
-          <DailyCoffee />
+          <DailyCoffee triggerRefresh={triggerRefresh} />
         </Section>
         <Section>
-          <OrderHistory />
+          <OrderHistory refreshKey={refreshKey} />
         </Section>
         <Section>
-          <BalanceDisplay />
+          <BalanceDisplay refreshKey={refreshKey} />
         </Section>
       </Stack>
     </Container>

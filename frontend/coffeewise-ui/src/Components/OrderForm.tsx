@@ -6,22 +6,24 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import type { OrderItemDto, PersonDto } from "../types/dto";
-import { formatDate } from "../utils/dateUtils";
 import { submitOrder as submitOrderApi } from "../api/coffeewise";
 
 export default function OrderForm({
   members,
   presentMap,
   recommendedPayer,
+  onOrderSubmitted,
 }: {
   members: PersonDto[];
   presentMap: Record<string, boolean>;
   recommendedPayer: PersonDto | null;
+  onOrderSubmitted?: () => void;
 }) {
   const presentMembers = useMemo(
     () => members.filter((m) => presentMap[m.personId]),
     [members, presentMap]
   );
+
   const presentMemberIds = useMemo(
     () => presentMembers.map((m) => m.personId),
     [presentMembers]
@@ -30,6 +32,7 @@ export default function OrderForm({
   const [items, setItems] = useState<
     { consumerPersonId: string; description: string; price: string }[]
   >([]);
+
   const [payerId, setPayerId] = useState<string>("");
 
   useEffect(() => {
@@ -41,7 +44,7 @@ export default function OrderForm({
     } else if (!presentMemberIds.includes(payerId)) {
       setPayerId("");
     }
-  }, [recommendedPayer, presentMemberIds.join(","), payerId]);
+  }, [recommendedPayer, presentMemberIds, payerId]);
 
   useEffect(() => {
     setItems((prev) =>
@@ -72,29 +75,31 @@ export default function OrderForm({
     );
   };
 
+  const isValidPrice = (val: string) =>
+    val === "" || /^\d*\.?\d{0,2}$/.test(val);
+
   const canSubmit =
-    payerId &&
+    payerId !== "" &&
     items.length === presentMembers.length &&
-    items.every((it) => it.price && !isNaN(Number(it.price)));
+    items.every((it) => it.price !== "" && !isNaN(Number(it.price)));
 
   const submitOrder = async () => {
     if (!canSubmit) return;
     const payloadItems: OrderItemDto[] = items.map((it) => ({
       consumerPersonId: it.consumerPersonId,
-      description: it.description,
+      description: it.description.trim(),
       price: parseFloat(it.price),
     }));
 
     try {
-      const today = formatDate();
       await submitOrderApi({
-        groupId: import.meta.env.VITE_GROUP_ID,
         payerPersonId: payerId,
-        date: today,
+        date: new Date().toISOString(), // could allow user to set prior date if submitting retroactively
         items: payloadItems,
       });
       alert("Order submitted!");
       setItems([]);
+      if (onOrderSubmitted) onOrderSubmitted();
     } catch (err) {
       console.error(err);
       alert("Error submitting order.");
@@ -145,8 +150,8 @@ export default function OrderForm({
                 label="Price"
                 value={it.price}
                 onChange={(e) => {
-                  let val = e.target.value;
-                  if (val === "" || /^\d*\.?\d{0,2}$/.test(val)) {
+                  const val = e.target.value;
+                  if (isValidPrice(val)) {
                     handleChange(idx, "price", val);
                   }
                 }}
@@ -174,7 +179,7 @@ export default function OrderForm({
       </Button>
       {!canSubmit && (
         <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-          All present people must have a price entered to submit.
+          All present people must have a valid price entered to submit.
         </Typography>
       )}
     </Box>

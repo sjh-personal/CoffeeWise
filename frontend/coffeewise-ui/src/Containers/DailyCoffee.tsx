@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
+// DailyCoffee.tsx
+import { useEffect, useState, useMemo } from "react";
 import { Box } from "@mui/material";
 import useGroupMembers from "../hooks/useGroupMembers";
 import {
@@ -11,7 +12,11 @@ import OrderForm from "../components/OrderForm";
 import RecommendedPayer from "../components/RecommendedPayer";
 import PresenceForm from "../components/PresenceForm";
 
-export default function DailyCoffee() {
+export default function DailyCoffee({
+  triggerRefresh,
+}: {
+  triggerRefresh: () => void;
+}) {
   const members = useGroupMembers();
 
   const [presentMap, setPresentMap] = useState<Record<string, boolean>>({});
@@ -107,6 +112,7 @@ export default function DailyCoffee() {
         members={members}
         presentMap={presentMap}
         recommendedPayer={recommendedPayer}
+        onOrderSubmitted={triggerRefresh}
       />
     </Box>
   );

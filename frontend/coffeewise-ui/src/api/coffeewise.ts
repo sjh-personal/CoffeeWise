@@ -65,7 +65,6 @@ export async function fetchBalances(): Promise<BalanceSummaryDto[]> {
 }
 
 export async function submitOrder(order: {
-  groupId: string;
   payerPersonId: string;
   date: string;
   items: OrderItemDto[];

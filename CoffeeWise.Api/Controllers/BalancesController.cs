@@ -15,20 +15,6 @@ public class BalancesController(IBalanceService balanceService) : ControllerBase
         return Ok(list);
     }
     
-    [HttpGet("ledger")]
-    public async Task<ActionResult<List<PairwiseContributionDto>>> GetLedger(Guid groupId)
-    {
-        var ledger = await balanceService.GetPairwiseContributionsAsync(groupId);
-        return Ok(ledger);
-    }
-    
-    [HttpGet("net-positions")]
-    public async Task<ActionResult<List<NetPositionDto>>> GetNetPositions(Guid groupId)
-    {
-        var positions = await balanceService.GetNetPositionsAsync(groupId);
-        return Ok(positions);
-    }
-    
     [HttpGet("next")]
     public async Task<ActionResult<PersonDto>> GetNextPayer(Guid groupId, [FromQuery] DateOnly? date)
     {

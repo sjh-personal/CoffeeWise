@@ -16,7 +16,7 @@ import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import type { OrderDto, PersonMap } from "../types/dto";
 import { fetchOrders, fetchPersonMap } from "../api/coffeewise";
 
-export default function OrderHistory() {
+export default function OrderHistory({ refreshKey }: { refreshKey: number }) {
   const [orders, setOrders] = useState<OrderDto[]>([]);
   const [personMap, setPersonMap] = useState<PersonMap>({});
   const [open, setOpen] = useState<string | null>(null);
@@ -30,15 +30,15 @@ export default function OrderHistory() {
       setOrders(ordersRes);
       setPersonMap(people);
     })();
-  }, []);
+  }, [refreshKey]);
 
   return (
     <Box>
       <Typography variant="h6" sx={{ mb: 2 }}>
         Order History
       </Typography>
-      <Paper>
-        <Table>
+      <Paper sx={{ maxHeight: 400, overflowY: "auto" }}>
+        <Table stickyHeader>
           <TableHead>
             <TableRow>
               <TableCell />
@@ -85,7 +85,16 @@ function OrderRow({
             {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </IconButton>
         </TableCell>
-        <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
+        <TableCell>
+          {new Date(order.date).toLocaleString(undefined, {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          })}
+        </TableCell>
         <TableCell>
           {personMap[order.payerPersonId] || order.payerPersonId}
         </TableCell>

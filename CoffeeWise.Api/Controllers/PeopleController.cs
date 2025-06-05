@@ -10,9 +10,5 @@ public class PeopleController(IPersonService personService) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<PersonDto>>> GetAll() =>
         Ok(await personService.GetAllPeopleAsync());
-
-    [HttpGet("{id}")]
-    public async Task<ActionResult<PersonDto>> Get(Guid id) =>
-        Ok(await personService.GetPersonAsync(id));
 }
 

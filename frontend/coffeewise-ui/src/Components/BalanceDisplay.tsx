@@ -13,7 +13,7 @@ import {
 import type { BalanceSummaryDto } from "../types/dto";
 import { fetchBalances } from "../api/coffeewise";
 
-export default function BalanceDisplay() {
+export default function BalanceDisplay({ refreshKey }: { refreshKey: number }) {
   const [balances, setBalances] = useState<BalanceSummaryDto[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +27,7 @@ export default function BalanceDisplay() {
       }
     };
     fetchData();
-  }, []);
+  }, [refreshKey]);
 
   if (loading) return <CircularProgress size={32} />;
 

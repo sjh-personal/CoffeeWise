@@ -6,21 +6,6 @@ namespace CoffeeWise.BusinessLogic.Services.Implementations;
 
 public class PersonService(CoffeeWiseDbContext db) : IPersonService
 {
-    public async Task<PersonDto> GetPersonAsync(Guid personId)
-    {
-        var person = await db.Persons.FindAsync(personId);
-        if (person is null)
-        {
-            throw new Exception($"Person not found: {personId}");   
-        }
-        
-        return new PersonDto(
-            person.Id,
-            person.Name,
-            person.Email
-        );
-    }
-
     public async Task<List<PersonDto>> GetAllPeopleAsync()
     {
         return await db.Persons

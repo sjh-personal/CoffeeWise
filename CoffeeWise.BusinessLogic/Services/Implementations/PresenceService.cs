@@ -35,33 +35,16 @@ public class PresenceService(CoffeeWiseDbContext db) : IPresenceService
 
     public async Task<List<PresenceDto>> GetPresenceForDateAsync(Guid groupId, DateOnly date)
     {
-        var memberIds = await db.GroupMembers
-            .Where(gm => gm.GroupId == groupId)
-            .Select(gm => gm.PersonId)
-            .ToListAsync();
-
-        var presences = await db.Presences
-            .Where(p => p.Date == date)
-            .Where(p => memberIds.Contains(p.PersonId))
-            .ToListAsync();
-
-        return presences
-            .Select(p => new PresenceDto(p.PersonId, p.Date, p.IsPresent))
-            .ToList();
-    }
-
-    public async Task<List<Guid>> GetPresentGroupMemberIdsAsync(Guid groupId, DateOnly date)
-    {
-        var memberIds = await db.GroupMembers
-            .Where(gm => gm.GroupId == groupId)
-            .Select(gm => gm.PersonId)
-            .ToListAsync();
-
         return await db.Presences
-            .Where(p => p.Date == date)
-            .Where(p => p.IsPresent)
-            .Where(p => memberIds.Contains(p.PersonId))
-            .Select(p => p.PersonId)
+            .Join(
+                db.GroupMembers,
+                presence => presence.PersonId,
+                groupMember => groupMember.PersonId,
+                (p, gm) => new { p, gm }
+            )
+            .Where(x => x.gm.GroupId == groupId)
+            .Where(x =>  x.p.Date == date)
+            .Select(x => new PresenceDto(x.p.PersonId, x.p.Date, x.p.IsPresent))
             .ToListAsync();
     }
 }
