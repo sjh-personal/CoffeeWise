@@ -1,0 +1,14 @@
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.Data/bin/Debug/net9.0/CoffeeWise.Data.deps.json
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.Data/bin/Debug/net9.0/CoffeeWise.Data.runtimeconfig.json
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.Data/bin/Debug/net9.0/CoffeeWise.Data.dll
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.Data/bin/Debug/net9.0/CoffeeWise.Data.pdb
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.Data/obj/Debug/net9.0/CoffeeWise.Data.csproj.AssemblyReference.cache
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.Data/obj/Debug/net9.0/CoffeeWise.Data.GeneratedMSBuildEditorConfig.editorconfig
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.Data/obj/Debug/net9.0/CoffeeWise.Data.AssemblyInfoInputs.cache
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.Data/obj/Debug/net9.0/CoffeeWise.Data.AssemblyInfo.cs
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.Data/obj/Debug/net9.0/CoffeeWise.Data.csproj.CoreCompileInputs.cache
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.Data/obj/Debug/net9.0/CoffeeWise.Data.dll
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.Data/obj/Debug/net9.0/refint/CoffeeWise.Data.dll
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.Data/obj/Debug/net9.0/CoffeeWise.Data.pdb
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.Data/obj/Debug/net9.0/CoffeeWise.Data.genruntimeconfig.cache
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.Data/obj/Debug/net9.0/ref/CoffeeWise.Data.dll

@@ -1,0 +1,12 @@
+.vscode/
+bin/
+obj/
+*.user
+*.suo
+node_modules/
+#.env - TODO - add this back (ignoring to allow demo environment)
+#.env.* - TODO - add this back (ignoring to allow demo environment)
+*.iml
+*.ipr
+*.iws
+.DS_Store

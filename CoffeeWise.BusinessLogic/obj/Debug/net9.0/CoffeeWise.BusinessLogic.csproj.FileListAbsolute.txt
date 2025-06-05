@@ -1,0 +1,15 @@
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/bin/Debug/net9.0/CoffeeWise.BusinessLogic.deps.json
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/bin/Debug/net9.0/CoffeeWise.BusinessLogic.dll
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/bin/Debug/net9.0/CoffeeWise.BusinessLogic.pdb
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/obj/Debug/net9.0/CoffeeWise.BusinessLogic.GeneratedMSBuildEditorConfig.editorconfig
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/obj/Debug/net9.0/CoffeeWise.BusinessLogic.AssemblyInfoInputs.cache
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/obj/Debug/net9.0/CoffeeWise.BusinessLogic.AssemblyInfo.cs
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/obj/Debug/net9.0/CoffeeWise.BusinessLogic.csproj.CoreCompileInputs.cache
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/obj/Debug/net9.0/CoffeeWise.BusinessLogic.dll
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/obj/Debug/net9.0/refint/CoffeeWise.BusinessLogic.dll
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/obj/Debug/net9.0/CoffeeWise.BusinessLogic.pdb
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/obj/Debug/net9.0/ref/CoffeeWise.BusinessLogic.dll
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/bin/Debug/net9.0/CoffeeWise.Data.dll
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/bin/Debug/net9.0/CoffeeWise.Data.pdb
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/obj/Debug/net9.0/CoffeeWise.BusinessLogic.csproj.AssemblyReference.cache
+/Users/samhoidal/projects/bertram_labs/CoffeeWise/CoffeeWise.BusinessLogic/obj/Debug/net9.0/CoffeeWi.3C8E7CC7.Up2Date

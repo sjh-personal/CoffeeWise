@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "WE3/fVH3WPY41stq59Zc3faWIk7NJpvSVcyE+idvYvo=",
+  "Source": "CoffeeWise.Api",
+  "BasePath": "_content/CoffeeWise.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

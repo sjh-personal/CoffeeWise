@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoffeeWise.Api", "CoffeeWise.Api\CoffeeWise.Api.csproj", "{8E252C35-A4F2-465F-A309-5ED90CED96B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoffeeWise.BusinessLogic", "CoffeeWise.BusinessLogic\CoffeeWise.BusinessLogic.csproj", "{968FB29C-4A66-4F6A-84D9-12278FF4F7CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoffeeWise.Data", "CoffeeWise.Data\CoffeeWise.Data.csproj", "{A6630283-320A-4715-B617-366F7CAD72FA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8E252C35-A4F2-465F-A309-5ED90CED96B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E252C35-A4F2-465F-A309-5ED90CED96B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E252C35-A4F2-465F-A309-5ED90CED96B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E252C35-A4F2-465F-A309-5ED90CED96B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{968FB29C-4A66-4F6A-84D9-12278FF4F7CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{968FB29C-4A66-4F6A-84D9-12278FF4F7CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{968FB29C-4A66-4F6A-84D9-12278FF4F7CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{968FB29C-4A66-4F6A-84D9-12278FF4F7CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6630283-320A-4715-B617-366F7CAD72FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6630283-320A-4715-B617-366F7CAD72FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6630283-320A-4715-B617-366F7CAD72FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6630283-320A-4715-B617-366F7CAD72FA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
