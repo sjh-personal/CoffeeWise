@@ -1,4 +1,3 @@
-// DailyCoffee.tsx
 import { useEffect, useState, useMemo } from "react";
 import { Box } from "@mui/material";
 import useGroupMembers from "../hooks/useGroupMembers";

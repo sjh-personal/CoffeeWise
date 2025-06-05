@@ -22,3 +22,5 @@ frontend/coffeewise-ui/node_modules/
 # .env.*
 
 .DS_Store
+
+.idea/
