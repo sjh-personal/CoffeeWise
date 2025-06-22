@@ -198,17 +198,24 @@ public class BalanceService(CoffeeWiseDbContext db) : IBalanceService
     {
         var netPositions = await GetNetPositionsAsync(groupId);
 
-        var creditors = new Queue<NetPositionDto>(
-            netPositions.Where(p => p.NetBalance > 0).OrderByDescending(p => p.NetBalance)
-        );
+        var creditors = new PriorityQueue<NetPositionDto, decimal>();
+        var debtors = new PriorityQueue<NetPositionDto, decimal>();
 
-        var debtors = new Queue<NetPositionDto>(
-            netPositions.Where(p => p.NetBalance < 0).OrderBy(p => p.NetBalance)
-        );
+        foreach (var p in netPositions)
+        {
+            if (p.NetBalance > 0)
+            {
+                creditors.Enqueue(p, -p.NetBalance); // min-heap by default. we want the creditor with the most owed at top so enqueue with neg. balance
+            }
+            else if (p.NetBalance < 0)
+            {
+                debtors.Enqueue(p, p.NetBalance);
+            }
+        }
 
         var settlements = new List<SettlementDto>();
 
-        while (creditors.Any() && debtors.Any())
+        while (creditors.Count > 0 && debtors.Count > 0)
         {
             var creditor = creditors.Dequeue();
             var debtor = debtors.Dequeue();
@@ -227,10 +234,10 @@ public class BalanceService(CoffeeWiseDbContext db) : IBalanceService
             var newDebtorBalance = debtor.NetBalance + amount;
 
             if (newCreditorBalance > 0)
-                creditors.Enqueue(creditor with { NetBalance = newCreditorBalance });
+                creditors.Enqueue(creditor with { NetBalance = newCreditorBalance }, -newCreditorBalance);
 
             if (newDebtorBalance < 0)
-                debtors.Enqueue(debtor with { NetBalance = newDebtorBalance });
+                debtors.Enqueue(debtor with { NetBalance = newDebtorBalance }, newDebtorBalance);
         }
 
         return settlements;
