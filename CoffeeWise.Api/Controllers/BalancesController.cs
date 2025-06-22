@@ -46,4 +46,11 @@ public class BalancesController(IBalanceService balanceService) : ControllerBase
         await balanceService.SettleUpAsync(groupId, request.FromPersonId, request.ToPersonId, request.Amount);
         return Ok();
     }
+    
+    [HttpGet("/api/groups/{groupId}/settlements")]
+    public async Task<ActionResult<List<SettlementDto>>> GetSimplifiedSettlements(Guid groupId)
+    {
+        var settlements = await balanceService.GetSimplifiedSettlementsAsync(groupId);
+        return Ok(settlements);
+    }
 }

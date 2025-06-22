@@ -186,7 +186,7 @@ public class BalanceService(CoffeeWiseDbContext db) : IBalanceService
                 {
                     GroupMemberId = members[toPersonId],
                     Description = "Settlement Payment",
-                    Price = -amount
+                    Price = amount
                 }
             }
         });
@@ -194,4 +194,45 @@ public class BalanceService(CoffeeWiseDbContext db) : IBalanceService
         await db.SaveChangesAsync();
     }
 
+    public async Task<List<SettlementDto>> GetSimplifiedSettlementsAsync(Guid groupId)
+    {
+        var netPositions = await GetNetPositionsAsync(groupId);
+
+        var creditors = new Queue<NetPositionDto>(
+            netPositions.Where(p => p.NetBalance > 0).OrderByDescending(p => p.NetBalance)
+        );
+
+        var debtors = new Queue<NetPositionDto>(
+            netPositions.Where(p => p.NetBalance < 0).OrderBy(p => p.NetBalance)
+        );
+
+        var settlements = new List<SettlementDto>();
+
+        while (creditors.Any() && debtors.Any())
+        {
+            var creditor = creditors.Dequeue();
+            var debtor = debtors.Dequeue();
+
+            var amount = Math.Min(creditor.NetBalance, -debtor.NetBalance);
+
+            settlements.Add(new SettlementDto(
+                debtor.PersonId,
+                debtor.Name,
+                creditor.PersonId,
+                creditor.Name,
+                amount
+            ));
+
+            var newCreditorBalance = creditor.NetBalance - amount;
+            var newDebtorBalance = debtor.NetBalance + amount;
+
+            if (newCreditorBalance > 0)
+                creditors.Enqueue(creditor with { NetBalance = newCreditorBalance });
+
+            if (newDebtorBalance < 0)
+                debtors.Enqueue(debtor with { NetBalance = newDebtorBalance });
+        }
+
+        return settlements;
+    }
 }

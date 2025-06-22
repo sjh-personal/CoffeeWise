@@ -38,4 +38,12 @@ export type OrderDto = {
   items: OrderItem[];
 };
 
+export type SettlementDto = {
+  fromPersonId: string;
+  fromName: string;
+  toPersonId: string;
+  toName: string;
+  amount: number;
+};
+
 export type PersonMap = Record<string, string>;

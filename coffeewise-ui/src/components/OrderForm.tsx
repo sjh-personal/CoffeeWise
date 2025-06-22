@@ -101,7 +101,7 @@ export default function OrderForm({
       setItems([]);
       if (onOrderSubmitted) onOrderSubmitted();
     } catch (err) {
-      console.error(err);
+      console.error("Failed to submit order.");
       alert("Error submitting order.");
     }
   };

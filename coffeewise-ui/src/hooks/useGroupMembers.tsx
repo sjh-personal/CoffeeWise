@@ -5,7 +5,9 @@ import { fetchGroupMembers } from "../api/coffeewise";
 export default function useGroupMembers(): PersonDto[] {
   const [members, setMembers] = useState<PersonDto[]>([]);
   useEffect(() => {
-    fetchGroupMembers().then(setMembers).catch(console.error);
+    fetchGroupMembers()
+      .then(setMembers)
+      .catch(() => console.error("Failed to fetch group members."));
   }, []);
   return members;
 }

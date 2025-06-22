@@ -4,7 +4,7 @@ import logo from "./assets/coffeewise-logo.png";
 import DailyCoffee from "./containers/DailyCoffee";
 import OrderHistory from "./components/OrderHistory";
 import BalanceDisplay from "./components/BalanceDisplay";
-import PairwiseSettleUp from "./components/PairwiseSettleUp";
+import SettleUpSection from "./containers/SettleUpSection";
 
 export const GROUP_ID = import.meta.env.VITE_GROUP_ID;
 
@@ -32,7 +32,10 @@ export default function App() {
           <BalanceDisplay refreshKey={refreshKey} />
         </Section>
         <Section>
-          <PairwiseSettleUp refreshBalances={triggerRefresh} />
+          <SettleUpSection
+            refreshKey={refreshKey}
+            refreshBalances={triggerRefresh}
+          />
         </Section>
       </Stack>
     </Container>

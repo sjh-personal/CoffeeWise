@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -9,17 +9,22 @@ import {
   Stack,
   Alert,
 } from "@mui/material";
-import { fetchPairwise, settlePairwise } from "../api/coffeewise";
+
 import useGroupMembers from "../hooks/useGroupMembers";
+import { fetchPairwise, settlePairwise } from "../api/coffeewise";
 
 export default function PairwiseSettleUp({
   refreshBalances,
+  prefillFrom,
+  prefillTo,
 }: {
   refreshBalances: () => void;
+  prefillFrom?: string;
+  prefillTo?: string;
 }) {
   const members = useGroupMembers();
-  const [payerId, setPayerId] = useState("");
-  const [payeeId, setPayeeId] = useState("");
+  const [payerId, setPayerId] = useState(prefillFrom || "");
+  const [payeeId, setPayeeId] = useState(prefillTo || "");
   const [loading, setLoading] = useState(false);
   const [pairwise, setPairwise] = useState<null | {
     fromPersonId: string;
@@ -27,6 +32,11 @@ export default function PairwiseSettleUp({
     amount: number;
   }>(null);
   const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPayerId(prefillFrom || "");
+    setPayeeId(prefillTo || "");
+  }, [prefillFrom, prefillTo]);
 
   useEffect(() => {
     if (!payerId || !payeeId || payerId === payeeId) {
@@ -42,6 +52,7 @@ export default function PairwiseSettleUp({
   const handleSettle = async () => {
     if (!pairwise || pairwise.amount === 0) return;
     setLoading(true);
+    console.log("testing", pairwise.amount);
     try {
       await settlePairwise(
         pairwise.fromPersonId,
@@ -69,7 +80,11 @@ export default function PairwiseSettleUp({
       <Typography variant="h6" sx={{ mb: 2 }}>
         Settle Up Between Two People
       </Typography>
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        alignItems="center"
+      >
         <Select
           value={payerId}
           onChange={(e) => setPayerId(e.target.value)}
@@ -84,7 +99,7 @@ export default function PairwiseSettleUp({
           ))}
         </Select>
         <Typography variant="body1" sx={{ alignSelf: "center" }}>
-          &rarr;
+          →
         </Typography>
         <Select
           value={payeeId}
