@@ -52,7 +52,6 @@ export default function PairwiseSettleUp({
   const handleSettle = async () => {
     if (!pairwise || pairwise.amount === 0) return;
     setLoading(true);
-    console.log("testing", pairwise.amount);
     try {
       await settlePairwise(
         pairwise.fromPersonId,
