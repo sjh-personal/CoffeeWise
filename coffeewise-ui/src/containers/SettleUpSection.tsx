@@ -44,7 +44,7 @@ export default function SettleUpUnified({
   const [method, setMethod] = useState<MethodType>(MethodType.Direct);
   const [payerId, setPayerId] = useState<string>("");
   const [payeeId, setPayeeId] = useState<string>("");
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<number | null>(null);
 
   const [directList, setDirectList] = useState<PairwiseBalanceDto[] | null>(
     null
@@ -71,7 +71,7 @@ export default function SettleUpUnified({
 
   useEffect(() => {
     if (!payerId || !payeeId || payerId === payeeId) {
-      setAmount(0);
+      setAmount(null);
       return;
     }
 
@@ -79,30 +79,38 @@ export default function SettleUpUnified({
       const pair = directList.find(
         (d) => d.fromPersonId === payerId && d.toPersonId === payeeId
       );
-      setAmount(pair?.amount ?? 0);
+      setAmount(pair?.amount ?? null);
     }
 
     if (method === MethodType.Optimized && optList) {
       const opt = optList.find(
         (s) => s.fromPersonId === payerId && s.toPersonId === payeeId
       );
-      setAmount(opt?.amount ?? 0);
+      setAmount(opt?.amount ?? null);
     }
 
     if (method === MethodType.Custom) {
-      setAmount(0);
+      setAmount(null);
     }
   }, [method, payerId, payeeId, directList, optList]);
 
   const handleSubmit = async () => {
-    if (!payerId || !payeeId || payerId === payeeId || amount <= 0) return;
+    if (
+      !payerId ||
+      !payeeId ||
+      payerId === payeeId ||
+      amount === null ||
+      amount <= 0
+    )
+      return;
+
     setSubmitting(true);
     try {
       await settlePairwise(payerId, payeeId, amount);
       setMessage("Settlement recorded!");
       setPayerId("");
       setPayeeId("");
-      setAmount(0);
+      setAmount(null);
       setSelectedKey(null);
       refreshBalances();
     } catch {
@@ -205,8 +213,10 @@ export default function SettleUpUnified({
 
         <TextField
           type="number"
-          value={amount}
-          onChange={(e) => setAmount(+e.target.value)}
+          value={amount ?? ""}
+          onChange={(e) =>
+            setAmount(e.target.value === "" ? null : parseFloat(e.target.value))
+          }
           label="Amount"
           disabled={method !== MethodType.Custom}
           sx={{ maxWidth: 120 }}
@@ -226,6 +236,7 @@ export default function SettleUpUnified({
           !payerId ||
           !payeeId ||
           payerId === payeeId ||
+          amount === null ||
           amount <= 0 ||
           submitting
         }
