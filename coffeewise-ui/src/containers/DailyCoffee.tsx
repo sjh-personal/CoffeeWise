@@ -37,6 +37,12 @@ export default function DailyCoffee({
   );
 
   useEffect(() => {
+    if (!presentPersonIds?.length) {
+      setRecommendedPayer(null);
+      setLoadingRecommended(false);
+      return;
+    }
+
     let cancelled = false;
     const fetchPayer = async () => {
       setLoadingRecommended(true);
@@ -51,7 +57,7 @@ export default function DailyCoffee({
     return () => {
       cancelled = true;
     };
-  }, [presentPersonIds.join(",")]);
+  }, [presentPersonIds]);
 
   useEffect(() => {
     let cancelled = false;
@@ -92,6 +98,7 @@ export default function DailyCoffee({
       console.error("Failed to update presence.");
     }
   };
+
   return (
     <Box>
       <PresenceForm
