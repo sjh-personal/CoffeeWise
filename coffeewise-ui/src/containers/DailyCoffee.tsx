@@ -4,9 +4,9 @@ import useGroupMembers from "../hooks/useGroupMembers";
 import {
   fetchRecommendedPayer,
   fetchPresenceFromServer,
+  markPresence,
 } from "../api/coffeewise";
 import type { PersonDto } from "../types/dto";
-import { GROUP_ID } from "../App";
 import OrderForm from "../components/OrderForm";
 import RecommendedPayer from "../components/RecommendedPayer";
 import PresenceForm from "../components/PresenceForm";
@@ -87,15 +87,11 @@ export default function DailyCoffee({
     setPresentMap((pm) => ({ ...pm, [personId]: isPresent }));
     setChangedLocally((cl) => ({ ...cl, [personId]: Date.now() }));
     try {
-      await fetch(
-        `${
-          import.meta.env.VITE_API_BASE_URL
-        }/api/groups/${GROUP_ID}/people/${personId}/presence?isPresent=${isPresent}`,
-        { method: "POST" }
-      );
-    } catch {}
+      await markPresence(personId, isPresent);
+    } catch (err) {
+      console.error("Failed to update presence.");
+    }
   };
-
   return (
     <Box>
       <PresenceForm

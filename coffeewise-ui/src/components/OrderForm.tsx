@@ -5,8 +5,10 @@ import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
+import Snackbar from "@mui/material/Snackbar";
 import type { OrderItemDto, PersonDto } from "../types/dto";
 import { submitOrder as submitOrderApi } from "../api/coffeewise";
+import Alert from "@mui/material/Alert";
 
 export default function OrderForm({
   members,
@@ -32,8 +34,10 @@ export default function OrderForm({
   const [items, setItems] = useState<
     { consumerPersonId: string; description: string; price: string }[]
   >([]);
-
   const [payerId, setPayerId] = useState<string>("");
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarError, setSnackbarError] = useState(false);
 
   useEffect(() => {
     if (
@@ -85,6 +89,7 @@ export default function OrderForm({
 
   const submitOrder = async () => {
     if (!canSubmit) return;
+
     const payloadItems: OrderItemDto[] = items.map((it) => ({
       consumerPersonId: it.consumerPersonId,
       description: it.description.trim(),
@@ -94,15 +99,15 @@ export default function OrderForm({
     try {
       await submitOrderApi({
         payerPersonId: payerId,
-        date: new Date().toISOString(), // could allow user to set prior date if submitting retroactively
+        date: new Date().toISOString(),
         items: payloadItems,
       });
-      alert("Order submitted!");
       setItems([]);
+      setSnackbarOpen(true);
       if (onOrderSubmitted) onOrderSubmitted();
     } catch (err) {
       console.error("Failed to submit order.");
-      alert("Error submitting order.");
+      setSnackbarError(true);
     }
   };
 
@@ -128,6 +133,7 @@ export default function OrderForm({
           </MenuItem>
         ))}
       </TextField>
+
       <Grid container spacing={2}>
         {items.map((it, idx) => {
           const m = members.find((mm) => mm.personId === it.consumerPersonId)!;
@@ -182,6 +188,38 @@ export default function OrderForm({
           All present people must have a valid price entered to submit.
         </Typography>
       )}
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="success"
+          elevation={6}
+          variant="filled"
+        >
+          Order submitted!
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={snackbarError}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarError(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarError(false)}
+          severity="error"
+          elevation={6}
+          variant="filled"
+        >
+          Error submitting order.
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
