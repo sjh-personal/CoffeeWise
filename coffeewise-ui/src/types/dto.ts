@@ -46,4 +46,12 @@ export type SettlementDto = {
   amount: number;
 };
 
+export interface PairwiseBalanceDto {
+  fromPersonId: string;
+  fromPersonName: string;
+  toPersonId: string;
+  toPersonName: string;
+  amount: number;
+}
+
 export type PersonMap = Record<string, string>;

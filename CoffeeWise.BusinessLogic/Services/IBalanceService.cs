@@ -9,4 +9,5 @@ public interface IBalanceService
     Task<PairwiseBalanceDto> GetPairwiseBalanceAsync(Guid groupId, Guid personAId, Guid personBId);
     Task SettleUpAsync(Guid groupId, Guid fromPersonId, Guid toPersonId, decimal amount);
     Task<List<SettlementDto>> GetSimplifiedSettlementsAsync(Guid groupId);
+    Task<List<PairwiseBalanceDto>> GetAllPairwisePositionsAsync(Guid groupId);
 }

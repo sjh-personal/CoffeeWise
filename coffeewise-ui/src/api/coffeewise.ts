@@ -5,6 +5,7 @@ import type {
   PersonMap,
   OrderItemDto,
   SettlementDto,
+  PairwiseBalanceDto,
 } from "../types/dto";
 import { GROUP_ID } from "../App";
 
@@ -118,4 +119,14 @@ export async function fetchSettlements(): Promise<SettlementDto[]> {
   );
   if (!res.ok) throw new Error("Failed to fetch settlements");
   return await res.json();
+}
+
+export async function fetchPairwisePositions(): Promise<PairwiseBalanceDto[]> {
+  const res = await fetch(
+    `${
+      import.meta.env.VITE_API_BASE_URL
+    }/api/groups/${GROUP_ID}/pairwise-positions`
+  );
+  if (!res.ok) throw new Error("Failed to fetch pairwise positions");
+  return res.json();
 }

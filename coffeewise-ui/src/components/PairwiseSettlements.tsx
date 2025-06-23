@@ -9,7 +9,6 @@ import {
   Stack,
   Alert,
 } from "@mui/material";
-
 import useGroupMembers from "../hooks/useGroupMembers";
 import { fetchPairwise, settlePairwise } from "../api/coffeewise";
 
@@ -26,18 +25,20 @@ export default function PairwiseSettleUp({
   const [payerId, setPayerId] = useState(prefillFrom || "");
   const [payeeId, setPayeeId] = useState(prefillTo || "");
   const [loading, setLoading] = useState(false);
-  const [pairwise, setPairwise] = useState<null | {
+  const [pairwise, setPairwise] = useState<{
     fromPersonId: string;
     toPersonId: string;
     amount: number;
-  }>(null);
+  } | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  // keep selects in sync with any new prefill
   useEffect(() => {
     setPayerId(prefillFrom || "");
     setPayeeId(prefillTo || "");
   }, [prefillFrom, prefillTo]);
 
+  // fetch current pairwise owing
   useEffect(() => {
     if (!payerId || !payeeId || payerId === payeeId) {
       setPairwise(null);
@@ -77,7 +78,7 @@ export default function PairwiseSettleUp({
   return (
     <Paper sx={{ mt: 4, p: 3 }}>
       <Typography variant="h6" sx={{ mb: 2 }}>
-        Settle Up Between Two People
+        Settle Between Two People
       </Typography>
       <Stack
         direction={{ xs: "column", sm: "row" }}
@@ -97,9 +98,7 @@ export default function PairwiseSettleUp({
             </MenuItem>
           ))}
         </Select>
-        <Typography variant="body1" sx={{ alignSelf: "center" }}>
-          →
-        </Typography>
+        <Typography>→</Typography>
         <Select
           value={payeeId}
           onChange={(e) => setPayeeId(e.target.value)}
@@ -114,45 +113,37 @@ export default function PairwiseSettleUp({
           ))}
         </Select>
       </Stack>
+
       <Box sx={{ mt: 2 }}>
         {payerId && payeeId && payerId === payeeId && (
           <Alert severity="error">Select two different people.</Alert>
         )}
-        {payerId && payeeId && payerId !== payeeId && pairwise && (
-          <>
-            {pairwise.fromPersonId === payerId &&
-            pairwise.toPersonId === payeeId ? (
-              pairwise.amount > 0 ? (
-                <Alert severity="info">
-                  <strong>{payer?.name}</strong> owes{" "}
-                  <strong>{payee?.name}</strong>{" "}
-                  <strong>${pairwise.amount.toFixed(2)}</strong>
-                </Alert>
-              ) : (
-                <Alert severity="success">These two are all settled up!</Alert>
-              )
+
+        {payerId &&
+          payeeId &&
+          payerId !== payeeId &&
+          pairwise &&
+          (pairwise.amount > 0 ? (
+            pairwise.fromPersonId === payerId ? (
+              <Alert severity="info">
+                <strong>{payer?.name}</strong> owes{" "}
+                <strong>{payee?.name}</strong>{" "}
+                <strong>${pairwise.amount.toFixed(2)}</strong>
+              </Alert>
             ) : (
-              <>
-                {pairwise.fromPersonId === payeeId &&
-                pairwise.toPersonId === payerId &&
-                pairwise.amount > 0 ? (
-                  <Alert severity="warning">
-                    <strong>{payee?.name}</strong> actually owes{" "}
-                    <strong>{payer?.name}</strong>{" "}
-                    <strong>${pairwise.amount.toFixed(2)}</strong>.
-                  </Alert>
-                ) : (
-                  <Alert severity="warning">
-                    <strong>{payer?.name}</strong> does not owe{" "}
-                    <strong>{payee?.name}</strong> anything.
-                  </Alert>
-                )}
-              </>
-            )}
-          </>
-        )}
+              <Alert severity="warning">
+                <strong>{payee?.name}</strong> actually owes{" "}
+                <strong>{payer?.name}</strong>{" "}
+                <strong>${pairwise.amount.toFixed(2)}</strong>
+              </Alert>
+            )
+          ) : (
+            <Alert severity="success">These two are settled up!</Alert>
+          ))}
+
         {message && <Alert severity="success">{message}</Alert>}
       </Box>
+
       <Button
         sx={{ mt: 2 }}
         variant="contained"

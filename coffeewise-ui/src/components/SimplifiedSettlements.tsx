@@ -8,7 +8,6 @@ import {
   ListItemText,
   CircularProgress,
 } from "@mui/material";
-
 import type { SettlementDto } from "../types/dto";
 import { fetchSettlements } from "../api/coffeewise";
 
@@ -16,12 +15,7 @@ export default function SimplifiedSettlements({
   onSelectPair,
   refreshKey,
 }: {
-  onSelectPair: (
-    fromId: string,
-    toId: string,
-    fromName: string,
-    toName: string
-  ) => void;
+  onSelectPair: (fromId: string, toId: string) => void;
   refreshKey: number;
 }) {
   const [settlements, setSettlements] = useState<SettlementDto[] | null>(null);
@@ -54,15 +48,13 @@ export default function SimplifiedSettlements({
   return (
     <Paper sx={{ p: 2 }}>
       <Typography sx={{ mb: 2, fontWeight: "medium" }}>
-        Click a settlement below to review and mark it as paid manually.
+        Click a settlement below to pre-fill the custom form.
       </Typography>
       <List dense>
         {settlements.map((s, idx) => (
           <ListItemButton
             key={idx}
-            onClick={() =>
-              onSelectPair(s.fromPersonId, s.toPersonId, s.fromName, s.toName)
-            }
+            onClick={() => onSelectPair(s.fromPersonId, s.toPersonId)}
           >
             <ListItemText
               primary={

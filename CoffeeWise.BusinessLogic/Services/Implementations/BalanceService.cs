@@ -242,4 +242,49 @@ public class BalanceService(CoffeeWiseDbContext db) : IBalanceService
 
         return settlements;
     }
+    
+    public async Task<List<PairwiseBalanceDto>> GetAllPairwisePositionsAsync(Guid groupId)
+    {
+        var contributions = await GetPairwiseContributionsAsync(groupId);
+
+        var netPairs = contributions
+            .Select(c => new
+            {
+                Key = new HashSet<Guid> { c.PayerPersonId, c.RecipientPersonId },
+                OrderedKey = c.PayerPersonId.CompareTo(c.RecipientPersonId) < 0
+                    ? (A: c.PayerPersonId, B: c.RecipientPersonId)
+                    : (A: c.RecipientPersonId, B: c.PayerPersonId),
+                Amount = c.PayerPersonId.CompareTo(c.RecipientPersonId) < 0
+                    ? c.AmountPaidForRecipient
+                    : -c.AmountPaidForRecipient
+            })
+            .GroupBy(x => x.OrderedKey)
+            .Select(g =>
+            {
+                var net = g.Sum(x => x.Amount);
+                return new
+                {
+                    From = net >= 0 ? g.Key.A : g.Key.B,
+                    To = net >= 0 ? g.Key.B : g.Key.A,
+                    Amount = Math.Abs(net)
+                };
+            })
+            .Where(x => x.Amount > 0)
+            .ToList();
+
+        var personIds = netPairs.SelectMany(x => new[] { x.From, x.To }).Distinct().ToList();
+
+        var names = await db.Persons
+            .Where(p => personIds.Contains(p.Id))
+            .ToDictionaryAsync(p => p.Id, p => p.Name);
+
+        return netPairs
+            .Select(x => new PairwiseBalanceDto(
+                x.To, names[x.To],
+                x.From, names[x.From],
+                x.Amount
+            ))
+            .ToList();
+    }
+
 }

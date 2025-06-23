@@ -53,4 +53,11 @@ public class BalancesController(IBalanceService balanceService) : ControllerBase
         var settlements = await balanceService.GetSimplifiedSettlementsAsync(groupId);
         return Ok(settlements);
     }
+    
+    [HttpGet("/api/groups/{groupId}/pairwise-positions")]
+    public async Task<ActionResult<List<PairwiseBalanceDto>>> GetPairwisePositions(Guid groupId)
+    {
+        var positions = await balanceService.GetAllPairwisePositionsAsync(groupId);
+        return Ok(positions);
+    }
 }
