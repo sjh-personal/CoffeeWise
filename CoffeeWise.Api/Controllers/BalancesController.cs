@@ -1,63 +1,61 @@
 using CoffeeWise.BusinessLogic.Models;
-using Microsoft.AspNetCore.Mvc;
 using CoffeeWise.BusinessLogic.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CoffeeWise.Api.Controllers;
 
 [ApiController]
-[Route("api/groups/{groupId}/balances")]
+[Route("api/balances")]
 public class BalancesController(IBalanceService balanceService) : ControllerBase
 {
-    [HttpGet]
-    public async Task<ActionResult<List<BalanceSummaryDto>>> GetBalances(Guid groupId)
-    {
-        var list = await balanceService.GetBalancesAsync(groupId);
-        return Ok(list);
-    }
-    
-    [HttpGet("next")]
+    [HttpGet("{groupId:guid}")]
+    public async Task<ActionResult<List<BalanceSummaryDto>>> GetBalances(Guid groupId) =>
+        Ok(await balanceService.GetBalancesAsync(groupId));
+
+    [HttpGet("{groupId:guid}/next")]
     public async Task<ActionResult<PersonDto>> GetNextPayer(Guid groupId, [FromQuery] DateOnly? date)
     {
         var useDate = date ?? DateOnly.FromDateTime(DateTime.UtcNow);
-
         try
         {
             var next = await balanceService.GetNextPayerAsync(groupId, useDate);
             return Ok(next);
         }
-        catch (Exception ex) when (ex.Message.Contains("No one is present"))
+        catch (InvalidOperationException)
         {
             return NoContent();
         }
     }
-    
-    [HttpGet("/api/groups/{groupId}/pairwise")]
-    public async Task<ActionResult<PairwiseBalanceDto>> GetPairwiseBalance(Guid groupId, [FromQuery] Guid personA, [FromQuery] Guid personB)
+
+    [HttpGet("{groupId:guid}/pairwise")]
+    public async Task<ActionResult<PairwiseBalanceDto>> GetPairwiseBalance(
+        Guid groupId,
+        [FromQuery] Guid personA,
+        [FromQuery] Guid personB)
     {
         if (personA == personB) return BadRequest("Cannot compare same person.");
-        var result = await balanceService.GetPairwiseBalanceAsync(groupId, personA, personB);
-        return Ok(result);
+        return Ok(await balanceService.GetPairwiseBalanceAsync(groupId, personA, personB));
     }
 
-    [HttpPost("/api/groups/{groupId}/settle")]
+    [HttpPost("{groupId:guid}/settle")]
     public async Task<IActionResult> SettleUp(Guid groupId, [FromBody] SettleUpRequestDto request)
     {
         if (request.FromPersonId == request.ToPersonId) return BadRequest("Cannot settle up with self.");
-        await balanceService.SettleUpAsync(groupId, request.FromPersonId, request.ToPersonId, request.Amount);
+
+        await balanceService.SettleUpAsync(
+            groupId,
+            request.FromPersonId,
+            request.ToPersonId,
+            request.Amount);
+
         return Ok();
     }
-    
-    [HttpGet("/api/groups/{groupId}/settlements")]
-    public async Task<ActionResult<List<SettlementDto>>> GetSimplifiedSettlements(Guid groupId)
-    {
-        var settlements = await balanceService.GetSimplifiedSettlementsAsync(groupId);
-        return Ok(settlements);
-    }
-    
-    [HttpGet("/api/groups/{groupId}/pairwise-positions")]
-    public async Task<ActionResult<List<PairwiseBalanceDto>>> GetPairwisePositions(Guid groupId)
-    {
-        var positions = await balanceService.GetAllPairwisePositionsAsync(groupId);
-        return Ok(positions);
-    }
+
+    [HttpGet("{groupId:guid}/simplified-settlements")]
+    public async Task<ActionResult<List<SettlementDto>>> GetSimplifiedSettlements(Guid groupId) =>
+        Ok(await balanceService.GetSimplifiedSettlementsAsync(groupId));
+
+    [HttpGet("{groupId:guid}/pairwise-positions")]
+    public async Task<ActionResult<List<PairwiseBalanceDto>>> GetPairwisePositions(Guid groupId) =>
+        Ok(await balanceService.GetAllPairwisePositionsAsync(groupId));
 }

@@ -5,17 +5,22 @@ using Microsoft.AspNetCore.Mvc;
 namespace CoffeeWise.Api.Controllers;
 
 [ApiController]
-[Route("api/groups/{groupId}/orders")]
+[Route("api/orders")]
 public class OrdersController(IOrderService orderService) : ControllerBase
 {
-    [HttpPost]
+    [HttpPost("{groupId:guid}")]
     public async Task<ActionResult<Guid>> Submit(Guid groupId, [FromBody] SubmitOrderRequest request)
     {
-        var id = await orderService.SubmitOrderAsync(groupId, request.PayerPersonId, request.Date, request.Items);
+        var id = await orderService.SubmitOrderAsync(
+            groupId,
+            request.PayerPersonId,
+            request.Date,
+            request.Items);
+
         return Ok(id);
     }
-
-    [HttpGet]
+    
+    [HttpGet("{groupId:guid}")]
     public async Task<ActionResult<List<OrderDto>>> GetAll(Guid groupId) =>
         Ok(await orderService.GetOrdersForGroupAsync(groupId));
 }

@@ -7,12 +7,18 @@ import type {
   SettlementDto,
   PairwiseBalanceDto,
 } from "../types/dto";
-import { GROUP_ID } from "../App";
+
+const API = import.meta.env.VITE_API_BASE_URL;
+const GROUP_ID = import.meta.env.VITE_GROUP_ID;
+
+const baseUrl = (path: string) => `${API}${path}`;
+const groupBase = baseUrl(`/api/groups/${GROUP_ID}`);
+const orderBase = baseUrl(`/api/orders/${GROUP_ID}`);
+const presenceBase = baseUrl(`/api/presences/${GROUP_ID}`);
+const balanceBase = baseUrl(`/api/balances/${GROUP_ID}`);
 
 export async function fetchGroup(): Promise<{ members: PersonDto[] }> {
-  const res = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/api/groups/${GROUP_ID}`
-  );
+  const res = await fetch(groupBase);
   if (!res.ok) throw new Error("Failed to fetch group");
   return res.json();
 }
@@ -22,46 +28,40 @@ export async function fetchGroupMembers(): Promise<PersonDto[]> {
 }
 
 export async function fetchPersonMap(): Promise<PersonMap> {
-  const group = await fetchGroup();
-  const map: PersonMap = {};
-  for (const m of group.members) map[m.personId] = m.name;
-  return map;
+  const { members } = await fetchGroup();
+  return Object.fromEntries(members.map((m) => [m.personId, m.name]));
 }
 
-export async function fetchPresenceFromServer(): Promise<
-  Record<string, boolean>
-> {
-  const res = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/api/groups/${GROUP_ID}/presences`
-  );
+export async function fetchPresenceFromServer(
+  date?: string
+): Promise<Record<string, boolean>> {
+  const url = new URL(presenceBase);
+  if (date) url.searchParams.set("date", date);
+  const res = await fetch(url.toString());
   if (!res.ok) return {};
-  const arr = await res.json();
-  const map: Record<string, boolean> = {};
-  for (const p of arr) map[p.personId] = p.isPresent;
-  return map;
+  const arr: { personId: string; isPresent: boolean }[] = await res.json();
+  return Object.fromEntries(arr.map((p) => [p.personId, p.isPresent]));
+}
+
+export async function markPresence(
+  personId: string,
+  isPresent: boolean
+): Promise<void> {
+  const url = new URL(`${presenceBase}/people/${personId}`);
+  url.searchParams.set("isPresent", String(isPresent));
+  const res = await fetch(url.toString(), { method: "POST" });
+  if (!res.ok) throw new Error("Failed to mark presence");
 }
 
 export async function fetchRecommendedPayer(): Promise<PersonDto | null> {
-  const res = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/api/groups/${GROUP_ID}/balances/next`
-  );
+  const res = await fetch(`${balanceBase}/next`);
   if (res.status === 204) return null;
-  if (!res.ok) return null;
+  if (!res.ok) throw new Error("Failed to fetch recommended payer");
   return res.json();
 }
 
 export async function fetchOrders(): Promise<OrderDto[]> {
-  const res = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/api/groups/${GROUP_ID}/orders`
-  );
-  if (!res.ok) return [];
-  return res.json();
-}
-
-export async function fetchBalances(): Promise<BalanceSummaryDto[]> {
-  const res = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/api/groups/${GROUP_ID}/balances`
-  );
+  const res = await fetch(orderBase);
   if (!res.ok) return [];
   return res.json();
 }
@@ -70,63 +70,55 @@ export async function submitOrder(order: {
   payerPersonId: string;
   date: string;
   items: OrderItemDto[];
-}) {
-  const res = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/api/groups/${GROUP_ID}/orders`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(order),
-    }
-  );
+}): Promise<string> {
+  const res = await fetch(orderBase, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(order),
+  });
   if (!res.ok) throw new Error("Failed to submit order");
   return res.json();
 }
 
-export async function fetchPairwise(personA: string, personB: string) {
-  const res = await fetch(
-    `${
-      import.meta.env.VITE_API_BASE_URL
-    }/api/groups/${GROUP_ID}/pairwise?personA=${personA}&personB=${personB}`
-  );
-  if (!res.ok) throw new Error("Failed to fetch pairwise");
-  return await res.json();
+export async function fetchBalances(): Promise<BalanceSummaryDto[]> {
+  const res = await fetch(balanceBase);
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function fetchPairwise(
+  personA: string,
+  personB: string
+): Promise<PairwiseBalanceDto> {
+  const url = new URL(`${balanceBase}/pairwise`);
+  url.searchParams.set("personA", personA);
+  url.searchParams.set("personB", personB);
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error("Failed to fetch pairwise balance");
+  return res.json();
 }
 
 export async function settlePairwise(
-  personA: string,
-  personB: string,
+  fromPersonId: string,
+  toPersonId: string,
   amount: number
-) {
-  const res = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/api/groups/${GROUP_ID}/settle`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fromPersonId: personA,
-        toPersonId: personB,
-        amount,
-      }),
-    }
-  );
+): Promise<void> {
+  const res = await fetch(`${balanceBase}/settle`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fromPersonId, toPersonId, amount }),
+  });
   if (!res.ok) throw new Error("Failed to settle up");
 }
 
 export async function fetchSettlements(): Promise<SettlementDto[]> {
-  const res = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/api/groups/${GROUP_ID}/settlements`
-  );
+  const res = await fetch(`${balanceBase}/simplified-settlements`);
   if (!res.ok) throw new Error("Failed to fetch settlements");
-  return await res.json();
+  return res.json();
 }
 
 export async function fetchPairwisePositions(): Promise<PairwiseBalanceDto[]> {
-  const res = await fetch(
-    `${
-      import.meta.env.VITE_API_BASE_URL
-    }/api/groups/${GROUP_ID}/pairwise-positions`
-  );
+  const res = await fetch(`${balanceBase}/pairwise-positions`);
   if (!res.ok) throw new Error("Failed to fetch pairwise positions");
   return res.json();
 }
