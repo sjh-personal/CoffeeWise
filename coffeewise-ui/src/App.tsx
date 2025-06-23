@@ -23,7 +23,7 @@ export default function App() {
           sx={{ height: 180, mb: 1 }}
         />
         <Section>
-          <DailyCoffee triggerRefresh={triggerRefresh} />
+          <DailyCoffee key={refreshKey} triggerRefresh={triggerRefresh} />
         </Section>
         <Section>
           <OrderHistory refreshKey={refreshKey} />
